@@ -1,0 +1,74 @@
+% testGeneralHough
+%
+% Test routine for the generalised Hough transformation (main program)
+
+function testGerneralHough()
+
+% Resolution in the scale dimension of HG
+scaleSteps = 3;
+% Minimum and maximum scale to be considered
+scaleRange = [1,2];
+
+% Resolution in the orientation dimension of HG
+angleSteps = 18;
+% Minimum and maximum angle
+angleRange = [0, 2*pi];
+
+% Filtersize to use when computing complex gradients
+gradKernelSize = 1;         %e.g. 1.2
+
+% Threshold for computing the binary object edge mask
+templateThresh = 0.5;
+
+% Scale and rotation to be applied to the test image
+testScale = 1.5;
+testAngle = pi/3;
+
+templateImg = imread('./img/testTemplate.jpg');
+if (length(size(templateImg)) > 2)
+    templateImg = rgb2gray(templateImg);
+end
+templateImg = double(templateImg);
+
+% Compute the test image and complex gradients (scale and rotate original)
+testImg = makeTestImg(templateImg, testAngle, testScale, scaleRange);
+gradImg = calcDirectionalGrad(testImg, gradKernelSize);
+
+% Compute the object template
+template = makeObjectTemplate(templateImg, gradKernelSize, templateThresh);
+
+% Display intermediate results
+subplot(2,3,1);
+imshow(template(:,:,1),[]);
+subplot(2,3,2);
+imshow(abs(template(:,:,2)),[]);
+subplot(2,3,3);
+imshow(abs(gradImg),[]);
+
+% Compute the Hough space
+houghSpace = generalHough(gradImg, template, scaleSteps, scaleRange, angleSteps, angleRange);
+
+% Vislualise the four dimensional Hough space
+[a b c d ]= size(houghSpace);
+result_hough = zeros(a,b);
+
+for i = 1 : a 
+   for j = 1 : b 
+       C= max(houghSpace(i,j,:,:));
+       result_hough(i,j) = max(C(:));
+   end 
+end    
+subplot(2,3,4);
+imshow(result_hough,[]);
+
+
+
+% Find the linear index of the global maximum in Hough space
+[ignore, maxInd] = max(houghSpace(:));
+% Convert the index to a conventional 4D coordinate
+objectList = convertLinearInd(size(houghSpace), maxInd);
+
+% Visualise the detection result
+subplot(2,3,6);
+plotHoughDetectionResult(testImg, template, objectList, scaleSteps, scaleRange, angleSteps, angleRange);
+end

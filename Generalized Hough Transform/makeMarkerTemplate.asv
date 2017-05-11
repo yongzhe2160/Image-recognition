@@ -1,0 +1,14 @@
+function [template]=makeMarkerTemplate(templateEdgeLen)
+% allocating template, OB
+template=zeros(templateEdgeLen,11,2);
+
+% create OB
+OB=ones(templateEdgeLen,1);
+OB=
+
+% create the complex gradient OI
+OI=[ones(floor(templateEdgeLen/2),1); 0; -ones(templateEdgeLen-floor(templateEdgeLen/2)-1,1)];
+
+% give value to template
+template(:,:,1)=OB;
+template(:,:,2)=OI;

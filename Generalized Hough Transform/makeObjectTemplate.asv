@@ -1,0 +1,9 @@
+function [template] = makeObjectTemplate(templateImg, gradKernelSize, templateThresh)
+[row col]=size(templateImg);
+template=zeros(row,col,2);
+OB=zeros(row, col);
+OI=calcDirectionalGrad(templateImg, gradKernelSize);
+i=find(abs(OI)>max(max(abs(OI)))*templateThresh);
+OB(i)=1;
+template(:,:,1)=OB;
+template(:,:,2)=OI;
