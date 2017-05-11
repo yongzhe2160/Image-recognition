@@ -1,0 +1,17 @@
+function [distMat, diffX, diffY]=calcDiffMatrices(imgSize)
+distMat=zeros(imgSize);
+diffX=zeros(imgSize);
+diffY=zeros(imgSize);
+
+for x=-floor(imgSize(1)/2):floor(imgSize(1)/2)-1
+    for y=-floor(imgSize(2)/2):floor(imgSize(2)/2)-1
+        distMat(x+floor(imgSize(1)/2)+1,y+floor(imgSize(2)/2)+1)=x^2+y^2;
+        diffX(x+floor(imgSize(1)/2)+1,y+floor(imgSize(2)/2)+1)=2*pi*i*x/imgSize(1);
+        diffY(x+floor(imgSize(1)/2)+1,y+floor(imgSize(2)/2)+1)=2*pi*i*y/imgSize(2);
+    end
+end
+distMat=circshift(distMat,[floor(imgSize(1)/2), floor(imgSize(2)/2)]);
+figure, imshow(distMat,[]);
+diffX=circshift(diffX,[-floor(imgSize(1)/2),0]);
+diffY=circshift(diffY,[0,-floor(imgSize(2)/2)]);
+pu
