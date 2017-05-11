@@ -1,0 +1,13 @@
+function [compProb]=gmmEStep(model, features)
+lnFeatureProb=calcLnFeatureProb(model, features);
+
+
+for i=1: size(features,1)
+    lnc=max(lnFeatureProb(:,i));
+    B=exp(sum(lnFeatureProb(:,i));
+    logtrick=log(B)+lnc;
+    for j=1: length(model.weight)
+
+        compProb(j,i)=lnFeatureProb(j,i)-logtrick;
+    end
+end

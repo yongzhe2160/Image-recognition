@@ -1,0 +1,15 @@
+function [model]=gmmMstep(model, features, weights, compProb)
+[Nc,Nx]=size(compProb);
+Nw=sum(weights);
+for j=1:Nc
+    Nj=0;
+    model.mean(j,:)=[0 0 0];
+    for i=1:Nx
+        Nj=Nj+weights(i)*compProb(j,i);
+    end
+    model.weight(j)=Nj/Nw;
+    
+    for i=1:Nx
+        
+    end
+end

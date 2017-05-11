@@ -1,0 +1,64 @@
+% function [newModel]=initNewComponent(model, features, weights)
+% 
+% model: Gaussian Mixture Model parameters (see learnGaussMixModel.m)
+% features: Feature space containing all vectors for one digit
+% features(j,:): Feature vector j of the current digit (three dimensional)
+% weights: The weights of feature vectors
+% weights(j): The weight of feature vector j
+% newModel: Updated model with a newly initialised component
+%
+% Adds a new component to the input mixture model
+% Analyses the current model and identifies ?weak? components
+%   - Weak: Does not fit the feature vectors it has been assigned
+% The weakest component is split to initialise the new component
+% Called in learnGaussMixModel
+
+
+function [newModel]=initNewComponent(model, features, weights)
+
+% number of components in current model
+compNum = numel(model.weight);
+
+% number of features
+featureNum = size(features, 1);
+
+% dimensionality of feature vectors (equals 3 in this exercise)
+featureDim = size(features, 2);
+
+% compute the likelihood of each feature in all components
+lnDataProb = calcLnFeatureProb(model, features);
+
+% the largest component is split (this is not a good criterion...)
+[ignore,splitComp] = max(model.weight);
+
+% compute new mean values, covariances, new component weights...
+newWeight = zeros(compNum+1,1);
+newMean = zeros(compNum+1,featureDim);
+newCovar = zeros(compNum+1,featureDim,featureDim);
+
+% copy old parameters
+newWeight(1:compNum) = model.weight;
+newMean(1:compNum,:) = model.mean;
+newCovar(1:compNum,:,:) = model.covar;
+
+% split component 'splitComp' along its major axis
+[eVec,eVal] = eig(squeeze(newCovar(splitComp,:,:)));
+[ignore,majAxis] = max(diag(eVal));
+devVec = sqrt(eVal(majAxis,majAxis)) * eVec(:,majAxis)';
+
+% initialise the new component
+newWeight(compNum+1) = 0.5*newWeight(splitComp);
+newMean(compNum+1,:) = newMean(splitComp,:) - 0.5*devVec;
+newCovar(compNum+1,:,:) = newCovar(splitComp,:,:) / 4.0;
+
+% update the new component
+newWeight(splitComp) = newWeight(compNum+1);
+newMean(splitComp,:) = newMean(compNum+1,:) + devVec;
+newCovar(splitComp,:,:) = newCovar(compNum+1,:,:);
+
+% adopt new parameters
+newModel.weight = newWeight;
+newModel.mean = newMean;
+newModel.covar = newCovar;
+
+end
