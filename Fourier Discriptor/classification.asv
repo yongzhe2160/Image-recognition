@@ -1,0 +1,66 @@
+
+img1=imread('leaf_type1.jpg');
+img2=imread('leaf_type2.jpg');
+FD1=trainingFD(img1);
+FD2=trainingFD(img2);
+
+img=imread('leaves_example.jpg');
+level = graythresh(img);
+BW = 1-im2bw(img,level);
+
+SE = strel('square',3);
+SE1 = strel('disk',1);
+SE2 = strel('disk',10);
+
+BW = imdilate(BW,SE1);
+BW = imerode(BW,SE2);
+figure,imshow(BW);
+
+BW2 = imdilate(BW,SE);
+Contourimg = BW2-BW;
+figure, imshow(Contourimg);
+
+[L, num] = bwlabel(Contourimg);
+
+[x,y]=size(L);
+
+result=zeros(x,y,3);
+
+for j=1:num
+leaf=zeros(x,y);
+[r,c] = find(L==j);
+for i=1:size(r)
+    leaf(r(i),c(i))=1;
+end
+
+
+
+for row = 1:x
+   for col = 1:y
+      if leaf(row,col),
+         break;
+      end
+   end
+   if leaf(row,col),
+      break;
+   end
+end
+
+contour = bwtraceboundary(leaf, [row, col], 'E');
+U = complex(contour(:,1),contour(:,2));
+
+FD3 = extractFD(U);
+FD4 = normalizeFD(FD3);
+FD5 = resizeFD(FD4,32);
+
+diff1=compareFD(FD5,FD1);
+diff2=compareFD(FD5,FD2);
+
+if diff1<diff2 
+    for i=1:size(r)
+        leaf(r(i),c(i))=1;
+    end
+else type(j)=2;
+    
+end
+end
